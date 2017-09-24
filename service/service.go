@@ -31,7 +31,10 @@ func (sv *Service) Balance(id int64) (result int64, err error) {
 }
 
 func (sv *Service) Histories(id int64) (result []*OpendEnvelope, err error) {
-	result = sv.histories[id]
+	var ok bool
+	if result, ok = sv.histories[id]; !ok {
+		result = make([]*OpendEnvelope, 0)
+	}
 	return
 }
 

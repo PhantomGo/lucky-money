@@ -3,6 +3,8 @@ package service
 import (
 	"math/rand"
 	"time"
+
+	"lucky-money/domain"
 )
 
 const letterBytes = "0123456789abcdefghijkmnpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -14,30 +16,30 @@ const (
 
 var src = rand.NewSource(time.Now().UnixNano())
 
-type CodeService struct {
-	envelopes map[string]*Envelope
+type Code struct {
+	envelopes map[string]*domain.Envelope
 }
 
-func NewCodeService() *CodeService {
-	return &CodeService{
-		envelopes: make(map[string]*Envelope),
+func NewCode() *Code {
+	return &Code{
+		envelopes: make(map[string]*domain.Envelope),
 	}
 }
 
-func (sv *CodeService) Verify(code string) (envelope *Envelope, ok bool) {
+func (sv *Code) Verify(code string) (envelope *domain.Envelope, ok bool) {
 	envelope, ok = sv.envelopes[code]
 	ok = !envelope.IsExpired()
 	return
 }
 
-func (sv *CodeService) GenerateTo(envelope *Envelope) (code string) {
+func (sv *Code) GenerateTo(envelope *domain.Envelope) (code string) {
 	code = randString(8)
 	sv.envelopes[code] = envelope
 	return
 }
 
-func (sv *CodeService) Clean() (result []*Envelope) {
-	result = make([]*Envelope, 0)
+func (sv *Code) Clean() (result []*domain.Envelope) {
+	result = make([]*domain.Envelope, 0)
 	for code, envlope := range sv.envelopes {
 		if envlope.IsExpired() {
 			delete(sv.envelopes, code)

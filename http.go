@@ -194,3 +194,7 @@ func Banlance(w http.ResponseWriter, r *http.Request) {
 
 	return
 }
+
+func AddAccount(w http.ResponseWriter, r *http.Request) {
+
+}

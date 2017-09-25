@@ -1,22 +1,25 @@
 package service
 
-import "errors"
+import (
+	"errors"
+	"lucky-money/domain"
+)
 
 type Service struct {
-	accounts  map[int64]*Account
-	histories map[int64][]*OpendEnvelope
+	accounts  map[int64]*domain.Account
+	histories map[int64][]*domain.OpendEnvelope
 	maxID     int64
 
-	code  *CodeService
-	lucky *LuckyService
+	code  *Code
+	lucky *Lucky
 }
 
 func NewService() *Service {
 	sv := &Service{
-		code:      NewCodeService(),
-		lucky:     NewLuckyService(),
-		accounts:  make(map[int64]*Account),
-		histories: make(map[int64][]*OpendEnvelope),
+		code:      NewCode(),
+		lucky:     NewLucky(),
+		accounts:  make(map[int64]*domain.Account),
+		histories: make(map[int64][]*domain.OpendEnvelope),
 		maxID:     0,
 	}
 	return sv
@@ -30,15 +33,15 @@ func (sv *Service) Balance(id int64) (result int64, err error) {
 	return
 }
 
-func (sv *Service) Histories(id int64) (result []*OpendEnvelope, err error) {
+func (sv *Service) Histories(id int64) (result []*domain.OpendEnvelope, err error) {
 	var ok bool
 	if result, ok = sv.histories[id]; !ok {
-		result = make([]*OpendEnvelope, 0)
+		result = make([]*domain.OpendEnvelope, 0)
 	}
 	return
 }
 
-func (sv *Service) Open(id int64, code string) (result *OpendEnvelope, err error) {
+func (sv *Service) Open(id int64, code string) (result *domain.OpendEnvelope, err error) {
 	var (
 		ok       bool
 		envelope *Envelope
@@ -53,7 +56,7 @@ func (sv *Service) Open(id int64, code string) (result *OpendEnvelope, err error
 	}
 	result, err = sv.lucky.Draw(sv.accounts[id], envelope)
 	if _, ok := sv.histories[id]; !ok {
-		sv.histories[id] = make([]*OpendEnvelope, 0)
+		sv.histories[id] = make([]*domain.OpendEnvelope, 0)
 	}
 	sv.histories[id] = append(sv.histories[id], result)
 	return

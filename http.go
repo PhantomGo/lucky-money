@@ -19,6 +19,7 @@ func InitHTTP() (err error) {
 	httpServeMux.HandleFunc("/luckmoney/envelop/open", Open)
 	httpServeMux.HandleFunc("/luckmoney/envelop", Fill)
 	httpServeMux.HandleFunc("/luckmoney/account/balance", Banlance)
+	httpServeMux.HandleFunc("/luckmoney/account", AddAccount)
 	addr = Conf.HTTPAddr
 	network = "tcp"
 	log.Info("start http listen:\"%s\"", Conf.HTTPAddr)
@@ -191,6 +192,27 @@ func Banlance(w http.ResponseWriter, r *http.Request) {
 	} else {
 		res["balance"] = ret
 	}
+
+	return
+}
+
+func AddAccount(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "GET" {
+		http.Error(w, "Method Not Allowed", 405)
+		return
+	}
+	var (
+		param = r.URL.Query()
+		res   = map[string]interface{}{}
+		aid   int
+		err   error
+	)
+	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
+		res["error"] = err.Error()
+	}
+	defer retWrite(w, r, res, time.Now())
+	Srv.Account(int64(aid))
+	res["ok"] = "ok"
 
 	return
 }

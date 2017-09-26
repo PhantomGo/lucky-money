@@ -1,15 +1,18 @@
 package service
 
-import "math/rand"
+import (
+	"lucky-money/domain"
+	"math/rand"
+)
 
-type LuckyService struct {
+type Lucky struct {
 }
 
-func NewLuckyService() *LuckyService {
-	return &LuckyService{}
+func NewLucky() *Lucky {
+	return &Lucky{}
 }
 
-func (sv *LuckyService) Draw(account *Account, el *Envelope) (result *OpendEnvelope, err error) {
+func (sv *Lucky) Draw(account *domain.Account, el *domain.Envelope) (result *domain.OpendEnvelope, err error) {
 	amount := money(int64(el.AvailableNumber), el.AvailableAmount)
 	if result, err = el.Open(account.ID, amount); err != nil {
 		return

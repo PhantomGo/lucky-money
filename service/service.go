@@ -44,7 +44,7 @@ func (sv *Service) Histories(id int64) (result []*domain.OpendEnvelope, err erro
 func (sv *Service) Open(id int64, code string) (result *domain.OpendEnvelope, err error) {
 	var (
 		ok       bool
-		envelope *Envelope
+		envelope *domain.Envelope
 	)
 	if _, ok = sv.accounts[id]; !ok {
 		err = errors.New("account does not exist")
@@ -64,9 +64,13 @@ func (sv *Service) Open(id int64, code string) (result *domain.OpendEnvelope, er
 
 func (sv *Service) Fill(id, amount int64, number int) (result string, err error) {
 	evID := sv.nextEnvelopeID()
-	envelope := NewEnvelop(evID, id, amount, number)
+	envelope := domain.NewEnvelop(evID, id, amount, number)
 	result = sv.code.GenerateTo(envelope)
 	return
+}
+
+func (sv *Service) Account(id int64) {
+	sv.accounts[id] = domain.NewAccount(id, 0)
 }
 
 func (sv *Service) ClearExpired() {

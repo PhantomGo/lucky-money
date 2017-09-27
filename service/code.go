@@ -27,8 +27,9 @@ func NewCode() *Code {
 }
 
 func (sv *Code) Verify(code string) (envelope *domain.Envelope, ok bool) {
-	envelope, ok = sv.envelopes[code]
-	ok = !envelope.IsExpired()
+	if envelope, ok = sv.envelopes[code]; ok {
+		ok = !envelope.IsExpired()
+	}
 	return
 }
 

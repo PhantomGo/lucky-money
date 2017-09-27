@@ -63,6 +63,10 @@ func (sv *Service) Open(id int64, code string) (result *domain.OpendEnvelope, er
 }
 
 func (sv *Service) Fill(id, amount int64, number int) (result string, err error) {
+	if _, ok := sv.accounts[id]; !ok {
+		err = errors.New("account does not exist")
+		return
+	}
 	evID := sv.nextEnvelopeID()
 	envelope := domain.NewEnvelop(evID, id, amount, number)
 	result = sv.code.GenerateTo(envelope)

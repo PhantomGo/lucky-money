@@ -7,7 +7,13 @@ func TestService(t *testing.T) {
 	srv.Account(1)
 	srv.Account(2)
 	srv.Account(3)
-	if code, err := srv.Fill(1, 100, 3); err == nil {
+
+	var (
+		code string
+		err  error
+	)
+
+	if code, err = srv.Fill(1, 100, 3); err == nil {
 		if r, err1 := srv.Open(1, code); err1 == nil {
 			print(r.Amount)
 			b, _ := srv.Balance(1)
@@ -42,5 +48,12 @@ func TestService(t *testing.T) {
 	hs, _ := srv.Histories(1)
 	for _, h := range hs {
 		print(" Account ", h.AccountID, " Balance ", h.Amount)
+	}
+
+	srv.ClearExpired()
+	if r, err1 := srv.Open(1, code); err1 != nil {
+		print(r)
+	} else {
+		t.Errorf("envelope is now expired")
 	}
 }

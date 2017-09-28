@@ -17,9 +17,9 @@ func InitHTTP() (err error) {
 	httpServeMux := http.NewServeMux()
 	httpServeMux.HandleFunc("/luckmoney/envelops", Histories)
 	httpServeMux.HandleFunc("/luckmoney/envelop/open", Open)
-	httpServeMux.HandleFunc("/luckmoney/envelop", Fill)
+	httpServeMux.HandleFunc("/luckmoney/envelop/send", Fill)
 	httpServeMux.HandleFunc("/luckmoney/account/balance", Banlance)
-	httpServeMux.HandleFunc("/luckmoney/account", AddAccount)
+	httpServeMux.HandleFunc("/luckmoney/accounts", AddAccount)
 	addr = Conf.HTTPAddr
 	network = "tcp"
 	log.Info("start http listen:\"%s\"", Conf.HTTPAddr)
@@ -82,6 +82,7 @@ func Histories(w http.ResponseWriter, r *http.Request) {
 	)
 	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
 		res["error"] = err.Error()
+		return
 	}
 	defer retWrite(w, r, res, time.Now())
 	if ret, err := Srv.Histories(int64(aid)); err != nil {
@@ -99,7 +100,7 @@ func Open(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var (
-		param     = r.Form
+		param     = r.PostFormValue
 		res       = map[string]interface{}{}
 		aid       int
 		code      string
@@ -107,11 +108,13 @@ func Open(w http.ResponseWriter, r *http.Request) {
 		body      string
 		bodyBytes []byte
 	)
-	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
+	if aid, err = strconv.Atoi(r.URL.Query().Get("account")); err != nil {
 		res["error"] = err.Error()
+		return
 	}
-	if code = param.Get("code"); len(code) != 8 {
+	if code = param("code"); len(code) != 8 {
 		res["error"] = "code is illegal"
+		return
 	}
 	defer retPWrite(w, r, res, &body, time.Now())
 	if bodyBytes, err = ioutil.ReadAll(r.Body); err != nil {
@@ -123,7 +126,7 @@ func Open(w http.ResponseWriter, r *http.Request) {
 	if ret, err := Srv.Open(int64(aid), code); err != nil {
 		res["error"] = err.Error()
 	} else {
-		res["code"] = ret
+		res["envelope"] = ret
 	}
 
 	return
@@ -135,26 +138,30 @@ func Fill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var (
-		param     = r.Form
+		param     = r.PostFormValue
 		res       = map[string]interface{}{}
-		aid       int
-		amount    int
-		number    int
+		aid       int64
+		amount    int64
+		number    uint64
 		err       error
 		body      string
 		bodyBytes []byte
 	)
-	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
+	if aid, err = strconv.ParseInt(r.URL.Query().Get("account"), 10, 64); err != nil {
 		res["error"] = err.Error()
+		return
 	}
-	if amount, err = strconv.Atoi(param.Get("amount")); err != nil {
+	if amount, err = strconv.ParseInt(param("amount"), 10, 64); err != nil {
 		res["error"] = err.Error()
+		return
 	}
-	if number, err = strconv.Atoi(param.Get("number")); err != nil {
+	if number, err = strconv.ParseUint(param("number"), 10, 64); err != nil {
 		res["error"] = err.Error()
+		return
 	}
-	if number > amount {
-		res["error"] = err.Error()
+	if int64(number) > amount {
+		res["error"] = "illegal number"
+		return
 	}
 	defer retPWrite(w, r, res, &body, time.Now())
 	if bodyBytes, err = ioutil.ReadAll(r.Body); err != nil {
@@ -163,7 +170,7 @@ func Fill(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body = string(bodyBytes)
-	if ret, err := Srv.Fill(int64(aid), int64(amount), number); err != nil {
+	if ret, err := Srv.Fill(aid, amount, uint(number)); err != nil {
 		res["error"] = err.Error()
 	} else {
 		res["code"] = ret
@@ -185,6 +192,7 @@ func Banlance(w http.ResponseWriter, r *http.Request) {
 	)
 	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
 		res["error"] = err.Error()
+		return
 	}
 	defer retWrite(w, r, res, time.Now())
 	if ret, err := Srv.Balance(int64(aid)); err != nil {
@@ -197,7 +205,7 @@ func Banlance(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddAccount(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "GET" {
+	if r.Method != "POST" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
@@ -209,6 +217,7 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	)
 	if aid, err = strconv.Atoi(param.Get("account")); err != nil {
 		res["error"] = err.Error()
+		return
 	}
 	defer retWrite(w, r, res, time.Now())
 	Srv.Account(int64(aid))

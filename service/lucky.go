@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+var rn = rand.New(src)
+
 type Lucky struct {
 }
 
@@ -25,9 +27,10 @@ func money(n, a int64) int64 {
 	if n == 1 {
 		return a
 	}
+
 	var money int64
 	if a > n {
-		money = rand.Int63n(a - n)
+		money = rn.Int63n(a - n)
 	} else {
 		money = 1
 	}

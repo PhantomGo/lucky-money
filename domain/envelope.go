@@ -10,7 +10,7 @@ type Envelope struct {
 	CreatorID       int64
 	TotalAmount     int64
 	AvailableAmount int64
-	TotalNumber     int
+	TotalNumber     uint
 	AvailableNumber uint
 	Ended           bool
 	Created         time.Time
@@ -23,14 +23,17 @@ type OpendEnvelope struct {
 	Amount     int64 `json:"amount"`
 }
 
-func NewEnvelop(id, aid, amount int64, number int) *Envelope {
+func NewEnvelope(id, aid, amount int64, number uint) *Envelope {
+	if int64(number) > amount {
+		panic("number greater than amount")
+	}
 	return &Envelope{
 		ID:              id,
 		CreatorID:       aid,
 		TotalAmount:     amount,
 		AvailableAmount: amount,
 		TotalNumber:     number,
-		AvailableNumber: uint(number),
+		AvailableNumber: number,
 		Ended:           false,
 		Created:         time.Now(),
 		OpendList:       make(map[int64]*OpendEnvelope),

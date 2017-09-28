@@ -68,7 +68,7 @@ func (sv *Service) Fill(id, amount int64, number int) (result string, err error)
 		return
 	}
 	evID := sv.nextEnvelopeID()
-	envelope := domain.NewEnvelop(evID, id, amount, number)
+	envelope := domain.NewEnvelope(evID, id, amount, number)
 	result = sv.code.GenerateTo(envelope)
 	return
 }

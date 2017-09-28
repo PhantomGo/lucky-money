@@ -23,7 +23,7 @@ type OpendEnvelope struct {
 	Amount     int64 `json:"amount"`
 }
 
-func NewEnvelop(id, aid, amount int64, number int) *Envelope {
+func NewEnvelope(id, aid, amount int64, number int) *Envelope {
 	return &Envelope{
 		ID:              id,
 		CreatorID:       aid,

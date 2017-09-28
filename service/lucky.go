@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+var rn = rand.New(src)
+
 type Lucky struct {
 }
 
@@ -20,8 +22,6 @@ func (sv *Lucky) Draw(account *domain.Account, el *domain.Envelope) (result *dom
 	account.Deposit(amount)
 	return
 }
-
-var rn = rand.New(src)
 
 func money(n, a int64) int64 {
 	if n == 1 {

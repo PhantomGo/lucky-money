@@ -15,11 +15,11 @@ func InitHTTP() (err error) {
 	// http listen
 	var network, addr string
 	httpServeMux := http.NewServeMux()
-	httpServeMux.HandleFunc("/luckmoney/envelops", Histories)
-	httpServeMux.HandleFunc("/luckmoney/envelop/open", Open)
-	httpServeMux.HandleFunc("/luckmoney/envelop/send", Fill)
-	httpServeMux.HandleFunc("/luckmoney/account/balance", Banlance)
-	httpServeMux.HandleFunc("/luckmoney/accounts", AddAccount)
+	httpServeMux.HandleFunc("/luckmoney/envelops", AuthHandler(Histories))
+	httpServeMux.HandleFunc("/luckmoney/envelop/open", AuthHandler(Open))
+	httpServeMux.HandleFunc("/luckmoney/envelop/send", AuthHandler(Fill))
+	httpServeMux.HandleFunc("/luckmoney/account/balance", AuthHandler(Banlance))
+	httpServeMux.HandleFunc("/luckmoney/accounts", AuthHandler(AddAccount))
 	addr = Conf.HTTPAddr
 	network = "tcp"
 	log.Info("start http listen:\"%s\"", Conf.HTTPAddr)
@@ -221,7 +221,7 @@ func AddAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	defer retWrite(w, r, res, time.Now())
 	Srv.Account(int64(aid))
-	res["ok"] = "ok"
+	res["auth_password"] = Conf.Password
 
 	return
 }

@@ -2,6 +2,8 @@ package main
 
 import (
 	"lucky-money/service"
+	"net/http"
+	"strings"
 	"time"
 
 	log "github.com/thinkboy/log4go"
@@ -22,4 +24,31 @@ func InitService() (err error) {
 		}
 	}()
 	return
+}
+
+func AuthHandler(handler func(http.ResponseWriter, *http.Request)) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, ok := r.Header["Authorization"]
+		if !ok {
+			http.Error(w, "Need Authorization Header", http.StatusBadRequest)
+			return
+		}
+
+		auth := strings.SplitN(r.Header["Authorization"][0], " ", 2)
+
+		if len(auth) != 2 {
+			http.Error(w, "Bad Syntax", http.StatusBadRequest)
+			return
+		}
+
+		if !authorize(auth[0], auth[1]) {
+			http.Error(w, "Authorization Failed", http.StatusUnauthorized)
+			return
+		}
+		handler(w, r)
+	}
+}
+
+func authorize(scheme, password string) bool {
+	return Conf.Password == password
 }

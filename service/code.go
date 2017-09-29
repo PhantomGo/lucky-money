@@ -1,10 +1,9 @@
 package service
 
 import (
+	"lucky-money/domain"
 	"math/rand"
 	"time"
-
-	"lucky-money/domain"
 )
 
 const letterBytes = "0123456789abcdefghijkmnpqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
